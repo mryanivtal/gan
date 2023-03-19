@@ -30,16 +30,16 @@ def train_batch(data: torch.Tensor, gen_model, gen_optimizer, dis_model, dis_opt
     dis_model.zero_grad()
     data = data.to(device)
     batch_len = len(data)
-    labels = torch.full([batch_len], real_label, dtype=torch.float, device=device)
+    labels = torch.full([batch_len], real_label, dtype=torch.float, device=device, requires_grad=False)
     labels_pred = dis_model(data).view(-1)
     loss_dis_real = criterion(labels_pred, labels)
     loss_dis_real.backward()
 
     # b. Train discriminator with fake data
     latent_dim = gen_model.latent_dim
-    noise = torch.randn([batch_len, latent_dim, 1, 1], device=device)
+    noise = torch.randn([batch_len, latent_dim, 1, 1], device=device, requires_grad=False)
     fake_data = gen_model(noise)
-    labels = torch.full([batch_len], fake_label, dtype=torch.float, device=device)
+    labels = torch.full([batch_len], fake_label, dtype=torch.float, device=device, requires_grad=False)
     labels_pred = dis_model(fake_data.detach()).view(-1)
     loss_dis_fake = criterion(labels_pred, labels)
     loss_dis_fake.backward()
@@ -48,7 +48,7 @@ def train_batch(data: torch.Tensor, gen_model, gen_optimizer, dis_model, dis_opt
 
     # ==== (2) Update generator network: maximize log(D(G(z)))
     gen_model.zero_grad()
-    labels = torch.full([batch_len], real_label, dtype=torch.float, device=device)
+    labels = torch.full([batch_len], real_label, dtype=torch.float, device=device, requires_grad=False)
     labels_pred = dis_model(fake_data).view(-1)
     loss_gen = criterion(labels_pred, labels)
     loss_gen.backward()
