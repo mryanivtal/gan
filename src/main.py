@@ -16,11 +16,14 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument('--outdir', type=str, default='./output', help='output folder')
-argparser.add_argument('--datadir', type=str, default='../datasets/cats', help='dataset folder')
-argparser.add_argument('--lrgen', type=float, default=1e-3, help='generator learning rate')
-argparser.add_argument('--lrdis', type=float, default=1e-3, help='discriminator learning rate')
+argparser.add_argument('--datadir', type=str, default='../../datasets/cats', help='dataset folder')
+argparser.add_argument('--lrgen', type=float, default=2e-4, help='generator learning rate')
+argparser.add_argument('--lrdis', type=float, default=2e-4, help='discriminator learning rate')
 argparser.add_argument('--epochs', type=int, default=100, help='number of training epochs')
 argparser.add_argument('--batchsize', type=int, default=50, help='train batch size')
+argparser.add_argument('--betadis', type=float, default=0.5, help='discriminator adam beta')
+argparser.add_argument('--betagen', type=float, default=0.5, help='generator adam beta')
+
 args = argparser.parse_args()
 
 OUTPUT_DIR = args.outdir
@@ -29,6 +32,8 @@ DIS_LEARNING_RATE = args.lrdis
 GEN_LEARNING_RATE = args.lrgen
 NUM_EPOCHS = args.epochs
 BATCH_SIZE = args.batchsize
+DIS_BETA = args.betadis
+GEN_BETA = args.betagen
 
 IMAGE_SIZE = [64, 64]
 IMAGE_NUM_CHANNELS = 3
@@ -53,9 +58,9 @@ gen_model.to(device)
 dis_model.to(device)
 
 # == Optimizer and loss ==
-criterion = nn.BCELoss()
-dis_optimizer = torch.optim.Adam(dis_model.parameters(), lr=DIS_LEARNING_RATE)
-gen_optimizer = torch.optim.Adam(dis_model.parameters(), lr=GEN_LEARNING_RATE)
+criterion = nn.BCELoss().to(device)
+dis_optimizer = torch.optim.Adam(dis_model.parameters(), lr=DIS_LEARNING_RATE, betas=(DIS_BETA, 0.999))
+gen_optimizer = torch.optim.Adam(dis_model.parameters(), lr=GEN_LEARNING_RATE, betas=(GEN_BETA, 0.999))
 
 # == Train loop ==
 epoch_losses = pd.DataFrame(columns=['epoch', 'gen_loss', 'dis_loss'])
