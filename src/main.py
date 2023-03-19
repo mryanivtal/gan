@@ -69,8 +69,6 @@ for epoch in range(NUM_EPOCHS):
     batch_losses_gen = []
     batch_losses_dis = []
 
-    seed_init_fn()  # TODO:Remove
-
     for i, data in enumerate(cats_dl):
         batch_loss = train_batch(data, gen_model, gen_optimizer, dis_model, dis_optimizer, criterion, device, real_label=REAL_LABEL, fake_label=FAKE_LABEL)
         batch_losses_gen.append(batch_loss['loss_gen'])
