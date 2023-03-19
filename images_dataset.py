@@ -9,9 +9,9 @@ from common_utils.torch_pil_utils import display_image_from_tensor
 
 
 class ImagesDataset(Dataset):
-    def __init__(self, images_dir: str, transformer=None):
+    def __init__(self, images_dir: str, transforms=None):
         self.images_path = Path(images_dir)
-        self.transformer = transformer
+        self.transforms = transforms
         assert self.images_path.exists()
 
         self.file_list = list(self.images_path.glob('*'))
@@ -26,7 +26,7 @@ class ImagesDataset(Dataset):
 
         image_path = Path(self.file_list[item])
         sample = read_image(str(image_path))
-        if self.transformer:
-            sample = self.transformer(sample)
+        if self.transforms:
+            sample = self.transforms(sample)
 
         return sample
