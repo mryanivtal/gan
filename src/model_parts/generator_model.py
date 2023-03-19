@@ -1,6 +1,5 @@
-import torch
 import torch.nn as nn
-from src.model_parts.convt_bn_relu_block import ConvtBnReluBlock
+from .convt_bn_relu_block import ConvtBnReluBlock
 
 
 class Generator(nn.Module):

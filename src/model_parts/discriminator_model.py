@@ -1,8 +1,5 @@
-import torch
 import torch.nn as nn
-
-from src.model_parts.conv_bn_lrelu_block import ConvBnLreluBlock
-from src.model_parts.convt_bn_relu_block import ConvtBnReluBlock
+from .conv_bn_lrelu_block import ConvBnLreluBlock
 
 
 class Discriminator(nn.Module):
