@@ -6,7 +6,7 @@ import pandas as pd
 import torch
 from torch import nn
 from common_utils.dataloader_utils import seed_init_fn
-from gan_functions import create_dataloader, train_batch, sample_from_generator
+from gan_functions import create_dataloader, train_batch, sample_from_generator, weights_init
 from model_parts.discriminator_model import Discriminator
 from model_parts.generator_model import Generator
 import warnings
@@ -23,6 +23,9 @@ argparser.add_argument('--epochs', type=int, default=100, help='number of traini
 argparser.add_argument('--batchsize', type=int, default=50, help='train batch size')
 argparser.add_argument('--betadis', type=float, default=0.5, help='discriminator adam beta')
 argparser.add_argument('--betagen', type=float, default=0.5, help='generator adam beta')
+argparser.add_argument('--randomseed', type=int, default=None, help='initial random seed')
+argparser.add_argument('--dlworkers', type=int, default=0, help='number of dataloader workers')
+
 
 args = argparser.parse_args()
 
@@ -34,6 +37,8 @@ NUM_EPOCHS = args.epochs
 BATCH_SIZE = args.batchsize
 DIS_BETA = args.betadis
 GEN_BETA = args.betagen
+RANDOM_SEED = args.randomseed
+DL_WORKERS = args.dlworkers
 
 IMAGE_SIZE = [64, 64]
 IMAGE_NUM_CHANNELS = 3
@@ -46,24 +51,40 @@ FAKE_LABEL = 0.
 # == prep folders ==
 output_path = Path(OUTPUT_DIR)
 output_path.mkdir(exist_ok=True, parents=True)
+print(f'Output path: {output_path.absolute()}')
+
+if RANDOM_SEED is not None:
+    seed_init_fn(RANDOM_SEED)
+    print(f'Random seed: {RANDOM_SEED}')
+
+print(f'DIS_LEARNING_RATE = {DIS_LEARNING_RATE}')
+print(f'GEN_LEARNING_RATE = {GEN_LEARNING_RATE}')
+print(f'DIS_BETA = {DIS_BETA}')
+print(f'GEN_BETA = {GEN_BETA}')
+print(f'NUM_EPOCHS = {NUM_EPOCHS}')
+print(f'BATCH_SIZE = {BATCH_SIZE}')
+print(f'DL_WORKERS = {DL_WORKERS}')
 
 # == Data ==
-cats_dl = create_dataloader(DATASET_DIR, batch_size=BATCH_SIZE)
+cats_dl = create_dataloader(DATASET_DIR, batch_size=BATCH_SIZE, num_workers=DL_WORKERS)
 
 # == Model ==
 gen_model = Generator(num_channels=IMAGE_NUM_CHANNELS, num_feature_maps=NUM_GEN_FEATURE_MAPS, latent_dim=LATENT_DIM)
-dis_model = Discriminator(num_channels=IMAGE_NUM_CHANNELS, num_feature_maps=NUM_DISC_FEATURE_MAPS)
-
+gen_model.apply(weights_init)
 gen_model.to(device)
+
+dis_model = Discriminator(num_channels=IMAGE_NUM_CHANNELS, num_feature_maps=NUM_DISC_FEATURE_MAPS)
+dis_model.apply(weights_init)
 dis_model.to(device)
 
 # == Optimizer and loss ==
 criterion = nn.BCELoss().to(device)
 dis_optimizer = torch.optim.Adam(dis_model.parameters(), lr=DIS_LEARNING_RATE, betas=(DIS_BETA, 0.999))
-gen_optimizer = torch.optim.Adam(dis_model.parameters(), lr=GEN_LEARNING_RATE, betas=(GEN_BETA, 0.999))
+gen_optimizer = torch.optim.Adam(gen_model.parameters(), lr=GEN_LEARNING_RATE, betas=(GEN_BETA, 0.999))
 
 # == Train loop ==
 epoch_losses = pd.DataFrame(columns=['epoch', 'gen_loss', 'dis_loss'])
+fixed_noise = torch.randn(64, LATENT_DIM, 1, 1, device=device)
 
 for epoch in range(NUM_EPOCHS):
     batch_losses_gen = []
@@ -76,9 +97,10 @@ for epoch in range(NUM_EPOCHS):
 
     epoch_loss = {'epoch': epoch, 'gen_loss': np.average(batch_losses_gen), 'dis_loss': np.average(batch_losses_dis)}
     epoch_losses = epoch_losses.append(epoch_loss, ignore_index=True)
+    print(f'Epoch: {epoch}, dis_loss: {epoch_loss["dis_loss"]}, gen_loss: {epoch_loss["gen_loss"]}')
     epoch_losses.to_csv(output_path / Path('train_loss.csv'))
-    sample_from_generator(16, gen_model, device, title=f'Epoch {epoch}', path_to_save=output_path / Path(f'epoch_{epoch}'))
-    print(epoch_losses)
+    sample_from_generator(64, gen_model, device, title=f'Epoch {epoch}', path_to_save=output_path / Path(f'epoch_{epoch}'), noise_vec=fixed_noise)
+
 
 
 

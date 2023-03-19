@@ -16,7 +16,7 @@ def pil_to_tensor(pil_img):
     return tensor_img, img_shape
 
 
-def display_image_from_tensor(tensor_img, title=None, save_path=None):
+def display_image_from_tensor(tensor_img, title=None, save_path=None, n_columns=8):
     tensor_img = tensor_img.detach()
 
     if len(tensor_img.shape) == 3:
@@ -27,11 +27,10 @@ def display_image_from_tensor(tensor_img, title=None, save_path=None):
 
     elif len(tensor_img.shape) == 4:
         n_images = tensor_img.shape[0]
-        n_cols = 4
-        n_rows = int(np.ceil(n_images / n_cols))
+        n_rows = int(np.ceil(n_images / n_columns))
 
         fig = plt.figure(figsize=(4., 4.))
-        grid = ImageGrid(fig, 111, nrows_ncols=(n_rows, n_cols),axes_pad=0.1)
+        grid = ImageGrid(fig, 111, nrows_ncols=(n_rows, n_columns),axes_pad=0.1)
 
         for i in range(n_images):
             img = transforms.ToPILImage()(tensor_img[i])

@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Dict
 
 import torch
+from torch import nn
 from torch.utils.data import DataLoader
 from torchvision.transforms import Lambda
 
@@ -10,14 +11,14 @@ from images_dataset import ImagesDataset
 from common_utils.dataloader_utils import seed_init_fn
 
 
-def create_dataloader(dataset_dir: str, batch_size=50) -> DataLoader:
+def create_dataloader(dataset_dir: str, batch_size=50, num_workers=0) -> DataLoader:
     if not Path(dataset_dir).exists():
         raise FileNotFoundError('input data folder does not exist')
 
     fn_ds_transforms = Lambda(lambda x: x / 255)
     cats_ds = ImagesDataset(dataset_dir, transforms=fn_ds_transforms)
     cats_dl = DataLoader(cats_ds, batch_size=batch_size,
-                         shuffle=True, num_workers=0, worker_init_fn=seed_init_fn)
+                         shuffle=True, worker_init_fn=seed_init_fn, num_workers=num_workers)
 
     return cats_dl
 
@@ -57,8 +58,22 @@ def train_batch(data: torch.Tensor, gen_model, gen_optimizer, dis_model, dis_opt
     return batch_loss
 
 
-def sample_from_generator(n_samples, gen_model, device, title=None, path_to_save=None):
+def sample_from_generator(n_samples, gen_model, device, title=None, path_to_save=None, noise=None):
     latent_dim = gen_model.latent_dim
-    noise = torch.randn([n_samples, latent_dim, 1, 1], device=device)
+    if noise:
+        assert list(noise.shape) == [n_samples, latent_dim, 1, 1]
+    else:
+        noise = torch.randn([n_samples, latent_dim, 1, 1], device=device)
+
     sample = gen_model(noise)
     display_image_from_tensor(sample, title=title, save_path=path_to_save)
+
+
+# custom weights initialization called on netG and netD
+def weights_init(model):
+    classname = model.__class__.__name__
+    if classname.find('Conv2d') != -1 or classname.find('ConvTranspose2d') != -1:
+        nn.init.normal_(model.weight.data, 0.0, 0.02)
+    elif classname.find('BatchNorm') != -1:
+        nn.init.normal_(model.weight.data, 1.0, 0.02)
+        nn.init.constant_(model.bias.data, 0)
