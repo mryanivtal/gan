@@ -99,7 +99,7 @@ for epoch in range(NUM_EPOCHS):
     epoch_losses = epoch_losses.append(epoch_loss, ignore_index=True)
     print(f'Epoch: {epoch}, dis_loss: {epoch_loss["dis_loss"]}, gen_loss: {epoch_loss["gen_loss"]}')
     epoch_losses.to_csv(output_path / Path('train_loss.csv'))
-    sample_from_generator(64, gen_model, device, title=f'Epoch {epoch}', path_to_save=output_path / Path(f'epoch_{epoch}'), noise_vec=fixed_noise)
+    sample_from_generator(64, gen_model, device, title=f'Epoch {epoch}', path_to_save=output_path / Path(f'epoch_{epoch}'), noise=fixed_noise)
 
 
 
