@@ -88,7 +88,8 @@ fixed_noise = torch.randn(64, LATENT_DIM, 1, 1, device=device)
 sample_from_generator(64, gen_model, device, title=f'Epoch 0', path_to_save=output_path / Path(f'epoch_0'),
                       noise=fixed_noise)
 
-for epoch in range(NUM_EPOCHS)+1:
+for epoch in range(NUM_EPOCHS):
+    epoch += 1
     batch_losses_gen = []
     batch_losses_dis = []
 
