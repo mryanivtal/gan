@@ -60,7 +60,7 @@ def train_batch(data: torch.Tensor, gen_model, gen_optimizer, dis_model, dis_opt
 
 def sample_from_generator(n_samples, gen_model, device, title=None, path_to_save=None, noise=None):
     latent_dim = gen_model.latent_dim
-    if noise:
+    if noise is not None:
         assert list(noise.shape) == [n_samples, latent_dim, 1, 1]
     else:
         noise = torch.randn([n_samples, latent_dim, 1, 1], device=device)
