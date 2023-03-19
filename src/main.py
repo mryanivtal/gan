@@ -70,8 +70,6 @@ for epoch in range(NUM_EPOCHS):
         batch_loss = train_batch(data, gen_model, gen_optimizer, dis_model, dis_optimizer, criterion, device, real_label=REAL_LABEL, fake_label=FAKE_LABEL)
         batch_losses_gen.append(batch_loss['loss_gen'])
         batch_losses_dis.append(batch_loss['loss_dis'])
-        if i == 10:
-            break
 
     epoch_loss = {'epoch': epoch, 'gen_loss': np.average(batch_losses_gen), 'dis_loss': np.average(batch_losses_dis)}
     epoch_losses = epoch_losses.append(epoch_loss, ignore_index=True)
