@@ -74,7 +74,7 @@ for epoch in range(NUM_EPOCHS):
     epoch_loss = {'epoch': epoch, 'gen_loss': np.average(batch_losses_gen), 'dis_loss': np.average(batch_losses_dis)}
     epoch_losses = epoch_losses.append(epoch_loss, ignore_index=True)
     epoch_losses.to_csv(output_path / Path('train_loss.csv'))
-    sample_from_generator(10, gen_model, device, title=f'Epoch {epoch}', path_to_save=output_path / Path(f'epoch_{epoch}'))
+    sample_from_generator(16, gen_model, device, title=f'Epoch {epoch}', path_to_save=output_path / Path(f'epoch_{epoch}'))
     print(epoch_losses)
 
 
