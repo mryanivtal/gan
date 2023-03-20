@@ -7,7 +7,12 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import ImageGrid
 
 
-def pil_to_tensor(pil_img):
+def pil_to_flat_tensor(pil_img):
+    """
+    Convert pil image to flat torch tensor
+    :param pil_img:
+    :return: flat tensor, original image shape
+    """
     tensor_img = transforms.PILToTensor()(pil_img)
     img_shape = tensor_img.shape
     tensor_img = tensor_img.flatten()
@@ -16,7 +21,15 @@ def pil_to_tensor(pil_img):
     return tensor_img, img_shape
 
 
-def display_image_from_tensor(tensor_img, title=None, save_path=None, n_columns=8):
+def display_images_from_tensor(tensor_img, title=None, display=True, save_path=None, n_columns=8):
+    """
+    :param tensor_img: torch.Tensor: 3d image tensor [c, w, h] or 4d images tensor [n, c, w, h]
+    :param title: str: title for plot
+    :param display: Boolean: Display on screen
+    :param save_path: str: filename to save (None if no save needed)
+    :param n_columns: int: cols in grid
+    :return: None
+    """
     tensor_img = tensor_img.detach()
 
     if len(tensor_img.shape) == 3:
@@ -37,9 +50,10 @@ def display_image_from_tensor(tensor_img, title=None, save_path=None, n_columns=
             grid[i].imshow(img)
 
     else:
-        raise Exception('invalid dimension - shoule be 3 for single image or 4 for batch')
+        raise Exception('invalid dimension - 3d image tensor [c, w, h] or 4d batch tensor [n, c, w, h]')
 
-    if save_path:
+    if save_path is not None:
         plt.savefig(save_path)
-    else:
+
+    if display:
         plt.show()

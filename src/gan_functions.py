@@ -6,7 +6,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 from torchvision.transforms import Lambda
 
-from common_utils.torch_pil_utils import display_image_from_tensor
+from common_utils.torch_pil_utils import display_images_from_tensor
 from images_dataset import ImagesDataset
 from common_utils.dataloader_utils import seed_init_fn
 
@@ -41,6 +41,7 @@ def train_batch(data: torch.Tensor, gen_model, gen_optimizer, dis_model, dis_opt
     fake_data = gen_model(noise)
     labels = torch.full([batch_len], fake_label, dtype=torch.float, device=device, requires_grad=False)
     labels_pred = dis_model(fake_data.detach()).view(-1)
+
     loss_dis_fake = criterion(labels_pred, labels)
     loss_dis_fake.backward()
     loss_dis = loss_dis_fake + loss_dis_real
@@ -66,7 +67,7 @@ def sample_from_generator(n_samples, gen_model, device, title=None, path_to_save
         noise = torch.randn([n_samples, latent_dim, 1, 1], device=device)
 
     sample = gen_model(noise)
-    display_image_from_tensor(sample, title=title, save_path=path_to_save)
+    display_images_from_tensor(sample, title=title, display=False, save_path=path_to_save, n_columns=8)
 
 
 # custom weights initialization called on netG and netD

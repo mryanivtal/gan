@@ -5,7 +5,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 from torchvision.io import read_image
 from pathlib import Path
-from common_utils.torch_pil_utils import display_image_from_tensor
+from common_utils.torch_pil_utils import display_images_from_tensor
 
 
 class ImagesDataset(Dataset):
