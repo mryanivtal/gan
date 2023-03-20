@@ -1,9 +1,8 @@
-import torch
 import torch.nn as nn
 
 
 class ConvBnLreluBlock(nn.Module):
-    '''
+    """
     Conv2d-BatchNorm-Relu block
     Input (named) arguments - same as ConvTranspose2d arguments:
         in_channels: int,
@@ -17,15 +16,16 @@ class ConvBnLreluBlock(nn.Module):
         padding_mode: str = 'zeros',
         device=None,
         dtype=None
-    '''
+        lrelu_slope=0.2 = Leaky relu slope
+    """
 
-    def __init__(self, in_channels, out_channels, kernel_size, **kwargs)-> None:
+    def __init__(self, in_channels, out_channels, kernel_size, lrelu_slope=0.2,  **kwargs) -> None:
         super(ConvBnLreluBlock, self).__init__()
 
         self.block = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size, **kwargs),
             nn.BatchNorm2d(out_channels),
-            nn.LeakyReLU(0.2, inplace=True),
+            nn.LeakyReLU(lrelu_slope, inplace=True),
         )
 
     def forward(self, input):

@@ -20,23 +20,15 @@ class ConvtBnReluBlock(nn.Module):
         dtype=None
     '''
 
-    def __init__(self, in_channels, out_channels, kernel_size, **kwargs)-> None:
+    def __init__(self, in_channels, out_channels, kernel_size, **kwargs) -> None:
         super(ConvtBnReluBlock, self).__init__()
 
-        # self.block = nn.Sequential(
-        #     nn.ConvTranspose2d(in_channels, out_channels, kernel_size, **kwargs),
-        #     nn.BatchNorm2d(out_channels),
-        #     nn.ReLU(inplace=True),
-        # )
-
-        self.a = nn.ConvTranspose2d(in_channels, out_channels, kernel_size, **kwargs)
-        self.b = nn.BatchNorm2d(out_channels)
-        self.c = nn.ReLU(inplace=True)
+        self.block = nn.Sequential(
+            nn.ConvTranspose2d(in_channels, out_channels, kernel_size, **kwargs),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True),
+        )
 
     def forward(self, input):
-        # return self.block(input)
+        return self.block(input)
 
-        res = self.a(input)
-        res = self.b(res)
-        res = self.c(res)
-        return res

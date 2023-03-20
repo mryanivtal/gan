@@ -70,8 +70,12 @@ def sample_from_generator(n_samples, gen_model, device, title=None, path_to_save
     display_images_from_tensor(sample, title=title, display=False, save_path=path_to_save, n_columns=8)
 
 
-# custom weights initialization called on netG and netD
 def weights_init(model):
+    """
+    Initialize model network weights for Conv2d, ConvTranspose2d, BatchNorm modules.
+    :param model:Pytorch model
+    :return: None
+    """
     classname = model.__class__.__name__
     if classname.find('Conv2d') != -1 or classname.find('ConvTranspose2d') != -1:
         nn.init.normal_(model.weight.data, 0.0, 0.02)
